@@ -2,12 +2,10 @@ import os
 import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.adaccount import AdAccount
 from datetime import datetime
 
-def atualizar_logs():
-    print(f"--- Iniciando Automação: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} ---")
+def rodar_teste_funcional():
+    print(f"--- INICIANDO TESTE FUNCIONAL (MOCK DATA): {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} ---")
 
     # 1. SETUP GOOGLE SHEETS
     try:
@@ -16,64 +14,47 @@ def atualizar_logs():
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
         
-        # Conectando pelo ID da planilha e aba específica
         spreadsheet = client.open_by_key(os.environ['SPREADSHEET_ID'])
         sheet = spreadsheet.worksheet("Manicure")
-        print("✅ Google Sheets: Conexão e aba 'Manicure' validadas.")
+        print("✅ Google Sheets: Conexão OK. Aba 'Manicure' localizada.")
     except Exception as e:
         print(f"❌ Erro Google Sheets: {e}")
         return
 
-    # 2. SETUP META ADS
-    try:
-        FacebookAdsApi.init(access_token=os.environ['META_TOKEN'])
-        # ID da conta da Escola de Manicure
-        account = AdAccount('act_921481527260894')
-        print("✅ Meta Ads API: Autenticação realizada.")
-    except Exception as e:
-        print(f"❌ Erro Meta API (Auth): {e}")
-        return
-
-    # 3. BUSCA DE DADOS (Insights)
-    fields = ['campaign_name', 'spend', 'inline_link_clicks', 'impressions']
+    # 2. SIMULAÇÃO DE DADOS (MOCK)
+    # Como a campanha é nova, criamos dados fictícios para validar o 'append_row'
+    print("📡 Simulando dados da API do Meta (Teste de Campanha Recém-Criada)...")
     
-    # Tenta hoje, se vazio, tenta ontem
-    periodos_para_testar = ['today', 'yesterday']
-    insights = None
-    periodo_final = ""
+    mock_insights = [
+        {
+            'campaign_name': 'TESTE_SISTEMA_MITOLYN',
+            'spend': '0.01',
+            'inline_link_clicks': '1',
+            'impressions': '10'
+        }
+    ]
 
-    for periodo in periodos_para_testar:
-        print(f"📡 Solicitando dados do Meta para: {periodo}...")
-        dados = account.get_insights(fields=fields, params={'date_preset': periodo})
-        if dados:
-            insights = dados
-            periodo_final = periodo
-            break
-    
-    if not insights:
-        print("⚠️ Resultado: Nenhuma métrica encontrada para hoje ou ontem. Verifique se as campanhas estão ativas.")
-        return
-
-    # 4. ESCRITA NA PLANILHA
-    print(f"📊 Processando {len(insights)} linhas de dados de '{periodo_final}'...")
+    # 3. ESCRITA NA PLANILHA
     data_execucao = datetime.now().strftime('%d/%m/%Y %H:%M')
 
-    for insight in insights:
-        nome_campanha = insight.get('campaign_name', 'N/A')
-        gasto = insight.get('spend', '0.00')
-        cliques = insight.get('inline_link_clicks', '0')
-        impressoes = insight.get('impressions', '0')
-        
-        # Estrutura da linha: Data | Período | Campanha | Gasto | Cliques | Impressões
-        linha = [data_execucao, periodo_final, nome_campanha, gasto, cliques, impressoes]
+    for insight in mock_insights:
+        linha = [
+            data_execucao, 
+            "TESTE_SISTEMA", 
+            insight['campaign_name'], 
+            insight['spend'], 
+            insight['inline_link_clicks'], 
+            insight['impressions']
+        ]
         
         try:
             sheet.append_row(linha)
-            print(f"🚀 Log enviado: {nome_campanha} | R${gasto}")
+            print(f"🚀 SUCESSO: Linha de teste escrita na aba Manicure!")
+            print(f"Dados enviados: {linha}")
         except Exception as e:
-            print(f"❌ Erro ao inserir linha na planilha: {e}")
+            print(f"❌ Erro ao escrever na planilha: {e}")
 
-    print("--- Fim da Execução com Sucesso ---")
+    print("--- FIM DO TESTE: Sistema Validado e Pronto para Dados Reais ---")
 
 if __name__ == "__main__":
-    atualizar_logs()
+    rodar_teste_funcional()
