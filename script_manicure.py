@@ -9,10 +9,16 @@ st.set_page_config(page_title="Curso Especialização Manicure", page_icon="💅
 
 # --- CONFIGURAÇÃO DE LOG ---
 def salvar_log_manicure(evento):
-    try:
-        # Conecta usando a URL da planilha que você enviou
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        params = st.query_params
+   try:
+            # Tenta ler a aba existente
+            dados_atuais = conn.read(worksheet="Página1", ttl=0)
+            df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
+        except Exception:
+            # Se a aba não existir ou estiver vazia, usa apenas o log novo
+            df_final = novo_log
+            
+        # Força o update na aba "Página1"
+        conn.update(worksheet="Página1", data=df_final)
         
         # Captura UTMs para o rastreio
         origem = params.get("utm_source", "direto")
