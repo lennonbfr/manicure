@@ -30,15 +30,32 @@ def salvar_log_manicure(evento):
             "Cidade": cidade
         }])
 
-        try:
-            dados_atuais = conn.read(worksheet="Página1", ttl=0)
-            df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
+      def salvar_log_manicure(evento):
 
-        except Exception:
-            df_final = novo_log
+    try:
+        conn = st.connection("gsheets", type=GSheetsConnection)
 
-        conn.update(worksheet="Página1", data=df_final)
+        params = st.query_params
 
+        origem = params.get("utm_source", "direto")
+        if isinstance(origem, list):
+            origem = origem[0]
+
+        cidade = params.get("utm_city", "Indefinida")
+        if isinstance(cidade, list):
+            cidade = cidade[0]
+
+        novo_log = pd.DataFrame([{
+            "Data/Hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "Evento": evento,
+            "Origem": origem,
+            "Cidade": cidade
+        }])
+
+        conn.append(worksheet="Página1", data=novo_log)
+
+    except Exception as e:
+        st.error(e)
     except Exception as e:
         logging.error(f"Erro no log Manicure: {e}")
 
