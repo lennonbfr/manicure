@@ -54,8 +54,16 @@ st.markdown("""
 
 if st.button("✅ QUERO SABER MAIS", use_container_width=True):
     salvar_log_manicure("Clique Saber Mais")
-    st.success("Redirecionando para a área de informações...")
-    st.markdown(f'<meta http-equiv="refresh" content="1;URL={LINK_VENDAS_MANICURE}">', unsafe_allow_html=True)
-
+    st.success("Perfeito! Clique no link abaixo para abrir a página oficial:")
+    
+    # Esta linha cria um link que abre em nova aba (target='_blank')
+    # Substituindo o redirecionamento automático que estava dando erro
+    st.markdown(f"""
+        <a href="{LINK_VENDAS_MANICURE}" target="_blank" style="text-decoration: none;">
+            <div style="background-color: #25d366; color: white; padding: 15px; text-align: center; border-radius: 10px; font-weight: bold; font-size: 20px;">
+                👉 CLIQUE AQUI PARA VER AS VAGAS 👈
+            </div>
+        </a>
+    """, unsafe_allow_html=True)
 st.markdown("---")
 st.caption("© 2026 - Suporte ao Profissional de Estética")
