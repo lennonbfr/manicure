@@ -7,69 +7,86 @@ from streamlit_gsheets import GSheetsConnection
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Curso Especialização Manicure", page_icon="💅")
 
-# --- CONFIGURAÇÃO DE LOG ---
+# --- FUNÇÃO DE LOG ---
 def salvar_log_manicure(evento):
-   try:
-            # Tenta ler a aba existente
-            dados_atuais = conn.read(worksheet="Página1", ttl=0)
-            df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
-        except Exception:
-            # Se a aba não existir ou estiver vazia, usa apenas o log novo
-            df_final = novo_log
-            
-        # Força o update na aba "Página1"
-        conn.update(worksheet="Página1", data=df_final)
-        
-        # Captura UTMs para o rastreio
+
+    try:
+        conn = st.connection("gsheets", type=GSheetsConnection)
+
+        params = st.query_params
+
         origem = params.get("utm_source", "direto")
-        if isinstance(origem, list): origem = origem[0]
-        
+        if isinstance(origem, list):
+            origem = origem[0]
+
         cidade = params.get("utm_city", "Indefinida")
-        if isinstance(cidade, list): cidade = cidade[0]
-        
+        if isinstance(cidade, list):
+            cidade = cidade[0]
+
         novo_log = pd.DataFrame([{
             "Data/Hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
             "Evento": evento,
             "Origem": origem,
             "Cidade": cidade
         }])
-        
-        # Lendo e atualizando a "Página1" conforme identificado na sua planilha
+
         try:
             dados_atuais = conn.read(worksheet="Página1", ttl=0)
             df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
-        except:
+
+        except Exception:
             df_final = novo_log
-            
+
         conn.update(worksheet="Página1", data=df_final)
+
     except Exception as e:
         logging.error(f"Erro no log Manicure: {e}")
 
+
+# --- REGISTRO AUTOMÁTICO DE VISITA ---
+if "visit_logged" not in st.session_state:
+    salvar_log_manicure("Visualizou Página")
+    st.session_state.visit_logged = True
+
+
 # --- INTERFACE DA PRESELL ---
-# Substitua pelo seu link real de vendas ou WhatsApp
-LINK_VENDAS_MANICURE = "https://go.hotmart.com/Y104886121U" 
+
+LINK_VENDAS_MANICURE = "https://go.hotmart.com/Y104886121U"
 
 st.image("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800")
 
 st.markdown("""
-    # ✨ Especialização Avançada: Manicure de Elite
-    ### Descubra a técnica que está fazendo manicures faturarem 3x mais com blindagem e esmaltação em gel.
-    
-    Aperte no botão abaixo para conferir a disponibilidade de vagas e o conteúdo completo do treinamento.
+# ✨ Especialização Avançada: Manicure de Elite
+
+### Descubra a técnica que está fazendo manicures faturarem 3x mais com blindagem e esmaltação em gel.
+
+Aperte no botão abaixo para conferir a disponibilidade de vagas e o conteúdo completo do treinamento.
 """)
 
+
+# --- BOTÃO PRINCIPAL ---
 if st.button("✅ QUERO SABER MAIS", use_container_width=True):
+
     salvar_log_manicure("Clique Saber Mais")
+
     st.success("Perfeito! Clique no link abaixo para abrir a página oficial:")
-    
-    # Esta linha cria um link que abre em nova aba (target='_blank')
-    # Substituindo o redirecionamento automático que estava dando erro
+
     st.markdown(f"""
-        <a href="{LINK_VENDAS_MANICURE}" target="_blank" style="text-decoration: none;">
-            <div style="background-color: #25d366; color: white; padding: 15px; text-align: center; border-radius: 10px; font-weight: bold; font-size: 20px;">
-                👉 CLIQUE AQUI PARA VER AS VAGAS 👈
-            </div>
-        </a>
+    <a href="{LINK_VENDAS_MANICURE}" target="_blank" style="text-decoration: none;">
+        <div style="
+            background-color:#25d366;
+            color:white;
+            padding:15px;
+            text-align:center;
+            border-radius:10px;
+            font-weight:bold;
+            font-size:20px;
+        ">
+        👉 CLIQUE AQUI PARA VER AS VAGAS 👈
+        </div>
+    </a>
     """, unsafe_allow_html=True)
+
+
 st.markdown("---")
 st.caption("© 2026 - Suporte ao Profissional de Estética")
