@@ -1,36 +1,23 @@
 import streamlit as st
 import pandas as pd
-import logging
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
-# --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Curso Especialização Manicure", page_icon="💅")
+# ---------------------------------------------------
+# CONFIGURAÇÃO DA PÁGINA
+# ---------------------------------------------------
 
-# --- FUNÇÃO DE LOG ---
+st.set_page_config(
+    page_title="Especialização Manicure",
+    page_icon="💅",
+    layout="centered"
+)
+
+# ---------------------------------------------------
+# FUNÇÃO DE LOG
+# ---------------------------------------------------
+
 def salvar_log_manicure(evento):
-
-    try:
-        conn = st.connection("gsheets", type=GSheetsConnection)
-
-        params = st.query_params
-
-        origem = params.get("utm_source", "direto")
-        if isinstance(origem, list):
-            origem = origem[0]
-
-        cidade = params.get("utm_city", "Indefinida")
-        if isinstance(cidade, list):
-            cidade = cidade[0]
-
-        novo_log = pd.DataFrame([{
-            "Data/Hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-            "Evento": evento,
-            "Origem": origem,
-            "Cidade": cidade
-        }])
-
-      def salvar_log_manicure(evento):
 
     try:
         conn = st.connection("gsheets", type=GSheetsConnection)
@@ -55,55 +42,69 @@ def salvar_log_manicure(evento):
         conn.append(worksheet="Página1", data=novo_log)
 
     except Exception as e:
-        st.error(e)
-    except Exception as e:
-        logging.error(f"Erro no log Manicure: {e}")
+        st.error(f"Erro ao salvar log: {e}")
 
+# ---------------------------------------------------
+# LOG DE VISUALIZAÇÃO DA PÁGINA
+# ---------------------------------------------------
 
-# --- REGISTRO AUTOMÁTICO DE VISITA ---
-if "visit_logged" not in st.session_state:
+if "log_pagina" not in st.session_state:
     salvar_log_manicure("Visualizou Página")
-    st.session_state.visit_logged = True
+    st.session_state.log_pagina = True
 
-
-# --- INTERFACE DA PRESELL ---
+# ---------------------------------------------------
+# LINK DE VENDAS
+# ---------------------------------------------------
 
 LINK_VENDAS_MANICURE = "https://go.hotmart.com/Y104886121U"
 
-st.image("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800")
+# ---------------------------------------------------
+# INTERFACE DA PÁGINA
+# ---------------------------------------------------
+
+st.image(
+    "https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=1200"
+)
 
 st.markdown("""
-# ✨ Especialização Avançada: Manicure de Elite
+# ✨ Especialização Avançada para Manicures
 
-### Descubra a técnica que está fazendo manicures faturarem 3x mais com blindagem e esmaltação em gel.
+### Descubra a técnica que está fazendo manicures faturarem **até 3x mais** com blindagem e esmaltação em gel.
 
-Aperte no botão abaixo para conferir a disponibilidade de vagas e o conteúdo completo do treinamento.
+Esse treinamento foi criado para manicures que querem:
+
+✔ Atrair clientes premium  
+✔ Cobrar mais pelos serviços  
+✔ Dominar técnicas modernas de blindagem e gel  
+
+Clique no botão abaixo para ver **como funciona o treinamento completo**.
 """)
 
+# ---------------------------------------------------
+# BOTÃO PRINCIPAL
+# ---------------------------------------------------
 
-# --- BOTÃO PRINCIPAL ---
-if st.button("✅ QUERO SABER MAIS", use_container_width=True):
+if st.button("💅 QUERO SABER MAIS", use_container_width=True):
 
     salvar_log_manicure("Clique Saber Mais")
 
-    st.success("Perfeito! Clique no link abaixo para abrir a página oficial:")
+    st.success("Perfeito! Clique no botão abaixo para acessar a página oficial do treinamento.")
 
     st.markdown(f"""
-    <a href="{LINK_VENDAS_MANICURE}" target="_blank" style="text-decoration: none;">
+    <a href="{LINK_VENDAS_MANICURE}" target="_blank" style="text-decoration:none;">
         <div style="
-            background-color:#25d366;
+            background-color:#e91e63;
             color:white;
-            padding:15px;
+            padding:16px;
             text-align:center;
             border-radius:10px;
-            font-weight:bold;
             font-size:20px;
+            font-weight:bold;
         ">
-        👉 CLIQUE AQUI PARA VER AS VAGAS 👈
+        👉 VER TREINAMENTO AGORA
         </div>
     </a>
     """, unsafe_allow_html=True)
-
 
 st.markdown("---")
 st.caption("© 2026 - Suporte ao Profissional de Estética")
