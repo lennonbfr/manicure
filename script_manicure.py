@@ -10,10 +10,11 @@ st.set_page_config(page_title="Curso Especialização Manicure", page_icon="💅
 # --- CONFIGURAÇÃO DE LOG ---
 def salvar_log_manicure(evento):
     try:
+        # Conecta usando a URL da planilha que você enviou
         conn = st.connection("gsheets", type=GSheetsConnection)
         params = st.query_params
         
-        # Captura UTMs para saber de qual anúncio veio
+        # Captura UTMs para o rastreio
         origem = params.get("utm_source", "direto")
         if isinstance(origem, list): origem = origem[0]
         
@@ -27,21 +28,22 @@ def salvar_log_manicure(evento):
             "Cidade": cidade
         }])
         
-        # Tenta ler a aba específica para Manicure
+        # Lendo e atualizando a "Página1" conforme identificado na sua planilha
         try:
-            dados_atuais = conn.read(worksheet="Manicure", ttl=0)
+            dados_atuais = conn.read(worksheet="Página1", ttl=0)
             df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
         except:
             df_final = novo_log
             
-        conn.update(worksheet="Manicure", data=df_final)
+        conn.update(worksheet="Página1", data=df_final)
     except Exception as e:
         logging.error(f"Erro no log Manicure: {e}")
 
 # --- INTERFACE DA PRESELL ---
-LINK_VENDAS_MANICURE = "SEU_LINK_AQUI" # Substitua pelo seu link de afiliado ou WhatsApp
+# Substitua pelo seu link real de vendas ou WhatsApp
+LINK_VENDAS_MANICURE = "https://seulinkaqui.com" 
 
-st.image("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800") # Imagem profissional de unhas
+st.image("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800")
 
 st.markdown("""
     # ✨ Especialização Avançada: Manicure de Elite
