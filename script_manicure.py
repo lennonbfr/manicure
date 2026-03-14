@@ -1,83 +1,59 @@
-import os
-import json
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.adaccount import AdAccount
+import streamlit as st
+import pandas as pd
+import logging
 from datetime import datetime
+from streamlit_gsheets import GSheetsConnection
 
-def monitorar_contas_mitolyn():
-    print(f"--- Início da Automação Mitolyn: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')} ---")
+# --- CONFIGURAÇÃO DA PÁGINA ---
+st.set_page_config(page_title="Curso Especialização Manicure", page_icon="💅")
 
-    # 1. SETUP GOOGLE SHEETS
+# --- CONFIGURAÇÃO DE LOG ---
+def salvar_log_manicure(evento):
     try:
-        creds_dict = json.loads(os.environ['GOOGLE_CREDS'])
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-        spreadsheet = client.open_by_key(os.environ['SPREADSHEET_ID'])
-        print("✅ Conectado ao Google Sheets.")
-    except Exception as e:
-        print(f"❌ Erro Google Sheets: {e}")
-        return
-
-    # 2. SETUP META ADS API
-    try:
-        FacebookAdsApi.init(access_token=os.environ['META_TOKEN'])
-        print("✅ Autenticado no Meta Ads.")
-    except Exception as e:
-        print(f"❌ Erro Meta API: {e}")
-        return
-
-    # 3. LISTA DE PRODUTOS E CONTAS
-    # Formato: [Nome da Aba, ID da Conta Meta]
-    configuracoes = [
-        ["Manicure", "act_921481527260894"], # Conta Brasil
-        ["Página1", "act_392072550928626"]   # Conta Alemanha (ID extraído do seu print)
-    ]
-
-    data_log = datetime.now().strftime('%d/%m/%Y %H:%M')
-
-    for aba_nome, account_id in configuracoes:
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        params = st.query_params
+        
+        # Captura UTMs para saber de qual anúncio veio
+        origem = params.get("utm_source", "direto")
+        if isinstance(origem, list): origem = origem[0]
+        
+        cidade = params.get("utm_city", "Indefinida")
+        if isinstance(cidade, list): cidade = cidade[0]
+        
+        novo_log = pd.DataFrame([{
+            "Data/Hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "Evento": evento,
+            "Origem": origem,
+            "Cidade": cidade
+        }])
+        
+        # Tenta ler a aba específica para Manicure
         try:
-            print(f"📡 Processando dados para: {aba_nome}...")
-            sheet = spreadsheet.worksheet(aba_nome)
-            account = AdAccount(account_id)
+            dados_atuais = conn.read(worksheet="Manicure", ttl=0)
+            df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
+        except:
+            df_final = novo_log
             
-            # Métricas solicitadas para o seu Dashboard
-            fields = ['campaign_name', 'spend', 'inline_link_clicks', 'impressions', 'ctr', 'cpc', 'cpm']
-            
-            # Tenta hoje, se vazio (comum de manhã), pega ontem
-            insights = account.get_insights(fields=fields, params={'date_preset': 'today'})
-            periodo = "Hoje"
-            
-            if not insights:
-                insights = account.get_insights(fields=fields, params={'date_preset': 'yesterday'})
-                periodo = "Ontem"
+        conn.update(worksheet="Manicure", data=df_final)
+    except Exception as e:
+        logging.error(f"Erro no log Manicure: {e}")
 
-            if insights:
-                for ins in insights:
-                    # Preparando a linha para a planilha
-                    linha = [
-                        data_log,
-                        periodo,
-                        ins.get('campaign_name'),
-                        f"R$ {ins.get('spend', '0')}",
-                        ins.get('inline_link_clicks', '0'),
-                        ins.get('impressions', '0'),
-                        f"{float(ins.get('ctr', 0)):.2f}%",
-                        f"R$ {ins.get('cpc', '0')}",
-                        f"R$ {ins.get('cpm', '0')}"
-                    ]
-                    sheet.append_row(linha)
-                    print(f"✅ {aba_nome}: Linha inserida com sucesso.")
-            else:
-                print(f"⚠️ {aba_nome}: Sem métricas para os períodos selecionados.")
+# --- INTERFACE DA PRESELL ---
+LINK_VENDAS_MANICURE = "SEU_LINK_AQUI" # Substitua pelo seu link de afiliado ou WhatsApp
 
-        except Exception as e:
-            print(f"❌ Erro ao processar aba '{aba_nome}': {e}")
+st.image("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800") # Imagem profissional de unhas
 
-    print("--- Automação Concluída com Sucesso ---")
+st.markdown("""
+    # ✨ Especialização Avançada: Manicure de Elite
+    ### Descubra a técnica que está fazendo manicures faturarem 3x mais com blindagem e esmaltação em gel.
+    
+    Aperte no botão abaixo para conferir a disponibilidade de vagas e o conteúdo completo do treinamento.
+""")
 
-if __name__ == "__main__":
-    monitorar_contas_mitolyn()
+if st.button("✅ QUERO SABER MAIS", use_container_width=True):
+    salvar_log_manicure("Clique Saber Mais")
+    st.success("Redirecionando para a área de informações...")
+    st.markdown(f'<meta http-equiv="refresh" content="1;URL={LINK_VENDAS_MANICURE}">', unsafe_allow_html=True)
+
+st.markdown("---")
+st.caption("© 2026 - Suporte ao Profissional de Estética")
