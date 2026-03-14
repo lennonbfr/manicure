@@ -39,27 +39,36 @@ def salvar_log_manicure(evento):
             "Cidade": cidade
         }])
 
-        conn.append(worksheet="Página1", data=novo_log)
+        try:
+            dados_atuais = conn.read(worksheet="Página1", ttl=0)
+            df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
+        except:
+            df_final = novo_log
+
+        conn.update(worksheet="Página1", data=df_final)
 
     except Exception as e:
         st.error(f"Erro ao salvar log: {e}")
 
+
 # ---------------------------------------------------
-# LOG DE VISUALIZAÇÃO DA PÁGINA
+# REGISTRA VISUALIZAÇÃO DA PÁGINA
 # ---------------------------------------------------
 
-if "log_pagina" not in st.session_state:
+if "log_visualizacao" not in st.session_state:
     salvar_log_manicure("Visualizou Página")
-    st.session_state.log_pagina = True
+    st.session_state.log_visualizacao = True
+
 
 # ---------------------------------------------------
-# LINK DE VENDAS
+# LINK DE VENDA
 # ---------------------------------------------------
 
 LINK_VENDAS_MANICURE = "https://go.hotmart.com/Y104886121U"
 
+
 # ---------------------------------------------------
-# INTERFACE DA PÁGINA
+# INTERFACE
 # ---------------------------------------------------
 
 st.image(
@@ -79,6 +88,7 @@ Esse treinamento foi criado para manicures que querem:
 
 Clique no botão abaixo para ver **como funciona o treinamento completo**.
 """)
+
 
 # ---------------------------------------------------
 # BOTÃO PRINCIPAL
@@ -105,6 +115,7 @@ if st.button("💅 QUERO SABER MAIS", use_container_width=True):
         </div>
     </a>
     """, unsafe_allow_html=True)
+
 
 st.markdown("---")
 st.caption("© 2026 - Suporte ao Profissional de Estética")
