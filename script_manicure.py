@@ -41,7 +41,7 @@ def salvar_log_manicure(evento):
 
 # --- INTERFACE DA PRESELL ---
 # Substitua pelo seu link real de vendas ou WhatsApp
-LINK_VENDAS_MANICURE = "https://seulinkaqui.com" 
+LINK_VENDAS_MANICURE = "https://go.hotmart.com/Y104886121U" 
 
 st.image("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=800")
 
