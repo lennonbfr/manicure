@@ -1,7 +1,4 @@
 import streamlit as st
-import pandas as pd
-from datetime import datetime
-from streamlit_gsheets import GSheetsConnection
 
 # ---------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
@@ -14,108 +11,118 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# FUNÇÃO DE LOG
-# ---------------------------------------------------
-
-def salvar_log_manicure(evento):
-
-    try:
-        conn = st.connection("gsheets", type=GSheetsConnection)
-
-        params = st.query_params
-
-        origem = params.get("utm_source", "direto")
-        if isinstance(origem, list):
-            origem = origem[0]
-
-        cidade = params.get("utm_city", "Indefinida")
-        if isinstance(cidade, list):
-            cidade = cidade[0]
-
-        novo_log = pd.DataFrame([{
-            "Data/Hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-            "Evento": evento,
-            "Origem": origem,
-            "Cidade": cidade
-        }])
-
-        try:
-            dados_atuais = conn.read(worksheet="Página1", ttl=0)
-            df_final = pd.concat([dados_atuais, novo_log], ignore_index=True)
-        except:
-            df_final = novo_log
-
-        conn.update(worksheet="Página1", data=df_final)
-
-    except Exception as e:
-        st.error(f"Erro ao salvar log: {e}")
-
-
-# ---------------------------------------------------
-# REGISTRA VISUALIZAÇÃO DA PÁGINA
-# ---------------------------------------------------
-
-if "log_visualizacao" not in st.session_state:
-    salvar_log_manicure("Visualizou Página")
-    st.session_state.log_visualizacao = True
-
-
-# ---------------------------------------------------
 # LINK DE VENDA
 # ---------------------------------------------------
 
 LINK_VENDAS_MANICURE = "https://go.hotmart.com/Y104886121U"
 
+# ---------------------------------------------------
+# CSS
+# ---------------------------------------------------
+
+st.markdown("""
+<style>
+.stApp {
+    background-color: #fffafc;
+}
+
+.block-container {
+    max-width: 760px;
+    padding-top: 1.2rem;
+    padding-bottom: 2rem;
+}
+
+.headline {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #111827;
+    margin-top: 1rem;
+    margin-bottom: 0.7rem;
+}
+
+.subheadline {
+    font-size: 1.1rem;
+    color: #374151;
+    margin-bottom: 1.2rem;
+}
+
+.benefit-box {
+    background: #ffffff;
+    border: 1px solid #f3d6e3;
+    border-radius: 16px;
+    padding: 18px;
+    margin: 18px 0;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+}
+
+.cta-note {
+    background: #fff1f7;
+    border: 1px solid #f9c5dc;
+    border-radius: 14px;
+    padding: 16px;
+    color: #7a284b;
+    margin: 18px 0;
+    font-size: 0.98rem;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------
 
 st.image(
-    "https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=1200"
+    "https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=1200",
+    use_container_width=True
+)
+
+st.markdown(
+    '<div class="headline">A técnica que está ajudando manicures a cobrar mais por atendimento</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    '<div class="subheadline">Descubra como a blindagem e a esmaltação em gel podem valorizar seu serviço, aumentar a percepção de qualidade e ajudar você a sair do básico.</div>',
+    unsafe_allow_html=True
 )
 
 st.markdown("""
-# ✨ Especialização Avançada para Manicures
+### Esse treinamento foi pensado para manicures que querem:
 
-### Descubra a técnica que está fazendo manicures faturarem **até 3x mais** com blindagem e esmaltação em gel.
-
-Esse treinamento foi criado para manicures que querem:
-
-✔ Atrair clientes premium  
-✔ Cobrar mais pelos serviços  
-✔ Dominar técnicas modernas de blindagem e gel  
-
-Clique no botão abaixo para ver **como funciona o treinamento completo**.
+- **aumentar o valor do atendimento**
+- **oferecer um serviço mais valorizado**
+- **aprender blindagem e esmaltação em gel**
+- **se diferenciar das profissionais que fazem o básico**
+- **ter mais segurança na hora de cobrar**
 """)
 
+st.markdown(
+    """
+    <div class="benefit-box">
+        <strong>Por que isso importa?</strong><br><br>
+        Muitas manicures continuam cobrando barato não porque trabalham mal,
+        mas porque ainda não dominam técnicas que deixam o serviço mais valorizado
+        aos olhos da cliente.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-# ---------------------------------------------------
-# BOTÃO PRINCIPAL
-# ---------------------------------------------------
+st.markdown(
+    """
+    <div class="cta-note">
+        Clique no botão abaixo para ver como funciona o treinamento completo.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-if st.button("💅 QUERO SABER MAIS", use_container_width=True):
-
-    salvar_log_manicure("Clique Saber Mais")
-
-    st.success("Perfeito! Clique no botão abaixo para acessar a página oficial do treinamento.")
-
-    st.markdown(f"""
-    <a href="{LINK_VENDAS_MANICURE}" target="_blank" style="text-decoration:none;">
-        <div style="
-            background-color:#e91e63;
-            color:white;
-            padding:16px;
-            text-align:center;
-            border-radius:10px;
-            font-size:20px;
-            font-weight:bold;
-        ">
-        👉 VER TREINAMENTO AGORA
-        </div>
-    </a>
-    """, unsafe_allow_html=True)
-
+st.link_button(
+    "💅 VER TREINAMENTO AGORA",
+    LINK_VENDAS_MANICURE,
+    use_container_width=True
+)
 
 st.markdown("---")
 st.caption("© 2026 - Suporte ao Profissional de Estética")
