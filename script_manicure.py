@@ -49,7 +49,6 @@ components.html(pixel_code, height=0)
 
 st.markdown("""
 <style>
-
 .stApp {
     background-color: #0b1220;
 }
@@ -77,6 +76,29 @@ st.markdown("""
     font-size: 1rem;
 }
 
+.custom-button-wrapper {
+    margin-top: 20px;
+}
+
+.custom-button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #111827;
+    color: white !important;
+    padding: 14px 18px;
+    border-radius: 10px;
+    text-decoration: none !important;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 1px solid #374151;
+    box-sizing: border-box;
+}
+
+.custom-button:hover {
+    background-color: #1f2937;
+    color: white !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -129,20 +151,20 @@ st.write("")
 st.write("Clique abaixo para ver como funciona o treinamento completo.")
 
 # ---------------------------------------------------
-# BOTÃO COM EVENTO + REDIRECIONAMENTO
+# BOTÃO HTML COM EVENTO + REDIRECIONAMENTO
 # ---------------------------------------------------
 
-clicked = st.button("👉 VER TREINAMENTO AGORA", use_container_width=True)
-
-if clicked:
-    st.markdown(f"""
-    <script>
-        if (typeof fbq !== 'undefined') {{
-            fbq('track', 'ViewContent');
-        }}
-        window.location.href = "{LINK_VENDAS_MANICURE}";
-    </script>
-    """, unsafe_allow_html=True)
+st.markdown(f"""
+<div class="custom-button-wrapper">
+    <a
+        class="custom-button"
+        href="{LINK_VENDAS_MANICURE}"
+        onclick="if (typeof fbq !== 'undefined') {{ fbq('track', 'ViewContent'); }}"
+    >
+        👉 VER TREINAMENTO AGORA
+    </a>
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------
 
