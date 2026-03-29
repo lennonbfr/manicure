@@ -132,16 +132,17 @@ st.write("Clique abaixo para ver como funciona o treinamento completo.")
 # BOTÃO COM EVENTO + REDIRECIONAMENTO
 # ---------------------------------------------------
 
-if st.button("👉 VER TREINAMENTO AGORA", use_container_width=True):
-    redirect_code = f"""
+clicked = st.button("👉 VER TREINAMENTO AGORA", use_container_width=True)
+
+if clicked:
+    st.markdown(f"""
     <script>
         if (typeof fbq !== 'undefined') {{
             fbq('track', 'ViewContent');
         }}
-        window.open('{LINK_VENDAS_MANICURE}', '_self');
+        window.location.href = "{LINK_VENDAS_MANICURE}";
     </script>
-    """
-    components.html(redirect_code, height=0)
+    """, unsafe_allow_html=True)
 
 # ---------------------------------------------------
 
